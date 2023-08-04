@@ -1,21 +1,36 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const btnMenu = document.getElementById("btn-menu");
+const menu = document.getElementById("menu");
+const radiusMenu = document.getElementById("radius");
+const boucingMenu = document.getElementById("bouncing");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+let launchingPos = false;
+let posXStart = 0;
+let posYStart = 0;
+let posX = 0;
+let posY = 0;
+let dirX = 0;
+let dirY = 0;
+let vx = 0;
+let vy = 0;
+
 const arrayOfBalls = [];
 
+
 class Balls {
-    constructor(x, y, color) {
+    constructor(x, y, vx, vy, radius, boucing, color) {
         this.x = x;
         this.y = y;
-        this.vx = 0;
-        this.vy = 0;
-        this.mass = 1;
+        this.vx = vx;
+        this.vy = vy;
         this.color = color;
-        this.radius = 50;
-        this.boucing = 0.80;
+        this.radius = radius;
+        this.boucing = boucing;
+        this.mass = this.radius / 3;
     }
 
     draw() {
@@ -28,20 +43,18 @@ class Balls {
         ctx.stroke();
     }
 
-    move(deltaTime) {
+    move() {
         const gravity = 9.807;
-        const accelerationY = gravity * this.mass;
+        const accelerationY = gravity;
+
+        this.vy += accelerationY * 0.1;
+
+        this.y += this.vy * 0.1;
+        this.x += this.vx * 0.1;
 
         if (this.y + this.radius >= canvas.height) {
             this.y = canvas.height - this.radius;
-            this.vy *= -this.boucing;
-
-            if (this.vy < 38 && this.vy > -30) {
-                this.vy = 0;
-            }
-
-        } else {
-            this.vy += accelerationY;
+            this.vy *= - this.boucing;
         }
 
         if (this.x + this.radius >= canvas.width) {
@@ -59,36 +72,34 @@ class Balls {
             this.vy *= -this.boucing;
         }
 
-        this.x += this.vx * deltaTime;
-        this.y += this.vy * deltaTime;
 
         this.draw();
     }
 
 }
 
-let lastTime = performance.now();
 
-const animate = (currentTime) => {
+const animate = () => {
     requestAnimationFrame(animate);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const deltaTime = (currentTime - lastTime) / 1000;
-
     for (i = 0; i < arrayOfBalls.length; i++) {
 
-        lastTime = currentTime;
-        arrayOfBalls[i].move(deltaTime);
+        arrayOfBalls[i].move();
+
         for (j = 0; j < arrayOfBalls.length; j++) {
             if (i !== j) {
                 colidCell(arrayOfBalls[i], arrayOfBalls[j]);
             }
         }
     }
+
+
+
 }
 
-animate(lastTime);
+animate();
 
 const detectColidCell = (c1x, c2x, c1y, c2y, c1r, c2r) => {
     const distX = c1x - c2x;
@@ -127,36 +138,51 @@ const colidCell = (ball, otherBall) => {
         otherBall.x += Math.cos(angle) * overlapDistance;
         otherBall.y += Math.sin(angle) * overlapDistance;
 
-        const normalVector = {
-            x: otherBall.x - ball.x,
-            y: otherBall.y - ball.y
-        };
-        const normalLength = Math.sqrt(normalVector.x * normalVector.x + normalVector.y * normalVector.y);
-        const unitNormalVector = {
-            x: normalVector.x / normalLength,
-            y: normalVector.y / normalLength
-        };
-
         const relativeVelocity = {
             x: ball.vx - otherBall.vx,
             y: ball.vy - otherBall.vy
         };
 
-        const dotProduct = relativeVelocity.x * unitNormalVector.x + relativeVelocity.y * unitNormalVector.y;
+        const dotProduct = relativeVelocity.x * Math.cos(angle) + relativeVelocity.y * Math.sin(angle);
 
-        const impulse = (2 * dotProduct) / (ball.mass + otherBall.mass);
+        const impulse = (1.7 * dotProduct) / (ball.mass + otherBall.mass);
 
-        ball.vx -= impulse * otherBall.mass * unitNormalVector.x;
-        ball.vy -= impulse * otherBall.mass * unitNormalVector.y;
-        otherBall.vx += impulse * ball.mass * unitNormalVector.x;
-        otherBall.vy += impulse * ball.mass * unitNormalVector.y;
+        ball.vx -= impulse * otherBall.mass * Math.cos(angle);
+        ball.vy -= impulse * otherBall.mass * Math.sin(angle);
+        otherBall.vx += impulse * ball.mass * Math.cos(angle);
+        otherBall.vy += impulse * ball.mass * Math.sin(angle);
     }
 }
 
-const createBall = (e) => {
 
-    const posX = e.clientX;
-    const posY = e.clientY;
+const calculateLauchingVelocity = () => {
+
+    if (launchingPos) {
+        launchingPos = false;
+
+        const velocityMagnitude = Math.sqrt(dirX * dirX + dirY * dirY);
+        const maxVelocity = 10000;
+        const velocityFactor = Math.min(velocityMagnitude / maxVelocity, 1);
+        const initialVelocityX = dirX / velocityMagnitude * maxVelocity * velocityFactor;
+        const initialVelocityY = dirY / velocityMagnitude * maxVelocity * velocityFactor;
+
+        if (isNaN(initialVelocityX)) {
+            vx = 0;
+        } else {
+            vx = initialVelocityX;
+        }
+
+        if (isNaN(initialVelocityY)) {
+            vy = 0;
+        } else {
+            vy = initialVelocityY;
+        }
+
+        createBall();
+    }
+}
+
+const createBall = () => {
 
     const h = Math.floor(Math.random() * 358);
     const s = 100;
@@ -164,11 +190,65 @@ const createBall = (e) => {
 
     const color = `hsl(${h},${s}%, ${l}%)`;
 
-    arrayOfBalls.push(new Balls(posX, posY, color));
+    const radius = parseInt(radiusMenu.value);
+    const boucing = parseFloat(boucingMenu.value);
 
-
+    arrayOfBalls.push(new Balls(posXStart, posYStart, vx, vy, radius, boucing, color));
 }
 
-canvas.addEventListener("click", (e) => {
-    createBall(e);
+const initPosLaunching = (eventPosX,eventPosY)=>{
+    launchingPos = true;
+
+    posXStart = eventPosX;
+    posYStart = eventPosY;
+    dirX = 0;
+    dirY = 0;
+}
+
+btnMenu.addEventListener("click", () => {
+    menu.classList.toggle("menu-hidden");
+    menu.classList.toggle("menu-visible");
+})
+
+canvas.addEventListener("mousedown", (e) => {
+    eventPosX = e.clientX;
+    eventPosY = e.clientY;
+
+    initPosLaunching(eventPosX,eventPosY)
 });
+
+canvas.addEventListener("touchstart", (e) => {
+
+    eventPosX = e.touches[0].clientX;
+    eventPosY = e.touches[0].clientY;
+
+    initPosLaunching(eventPosX,eventPosY)
+
+})
+
+canvas.addEventListener("mousemove", (e) => {
+    if (launchingPos) {
+        posX = e.clientX;
+        posY = e.clientY;
+
+        dirX = posXStart - posX;
+        dirY = posYStart - posY;
+    }
+});
+
+canvas.addEventListener("touchmove", (e) => {
+    if (launchingPos) {
+        posX = e.touches[0].clientX;
+        posY = e.touches[0].clientY;
+
+        dirX = posXStart - posX;
+        dirY = posYStart - posY;
+    }
+});
+
+
+canvas.addEventListener("mouseup", calculateLauchingVelocity)
+
+canvas.addEventListener("touchend", calculateLauchingVelocity)
+
+

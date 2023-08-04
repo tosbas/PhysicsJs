@@ -1,9 +1,63 @@
-body{
+body {
     margin: 0;
     box-sizing: border-box;
     overflow: hidden;
+    user-select: none;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
-#canvas{
+#canvas {
     background-color: black;
+}
+
+
+#btn-menu {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+}
+
+
+.menu-hidden {
+    visibility: hidden;
+}
+
+.menu-visible {
+    visibility: visible;
+}
+
+
+#menu {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    align-items: center;
+    background-color: white;
+    color: rgb(7, 7, 7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 250px;
+    height: 200px;
+    padding: 10px;
+    border: 5px solid rgb(16, 179, 16);
+    border-radius: 10px;
+}
+
+#menu > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#menu p {
+    width: 100px;
+}
+
+#menu input {
+    width: 50px;
+    padding: 5px;
+    border: 2px solid rgb(16, 179, 16);
 }
