@@ -196,7 +196,7 @@ const createBall = () => {
     arrayOfBalls.push(new Balls(posXStart, posYStart, vx, vy, radius, boucing, color));
 }
 
-const initPosLaunching = (eventPosX,eventPosY)=>{
+const initPosLaunching = (eventPosX, eventPosY) => {
     launchingPos = true;
 
     posXStart = eventPosX;
@@ -214,7 +214,7 @@ canvas.addEventListener("mousedown", (e) => {
     eventPosX = e.clientX;
     eventPosY = e.clientY;
 
-    initPosLaunching(eventPosX,eventPosY)
+    initPosLaunching(eventPosX, eventPosY)
 });
 
 canvas.addEventListener("touchstart", (e) => {
@@ -222,7 +222,7 @@ canvas.addEventListener("touchstart", (e) => {
     eventPosX = e.touches[0].clientX;
     eventPosY = e.touches[0].clientY;
 
-    initPosLaunching(eventPosX,eventPosY)
+    initPosLaunching(eventPosX, eventPosY)
 
 })
 
@@ -247,8 +247,13 @@ canvas.addEventListener("touchmove", (e) => {
 });
 
 
-canvas.addEventListener("mouseup", calculateLauchingVelocity)
+canvas.addEventListener("mouseup", ()=>{ 
+    calculateLauchingVelocity()
+});
 
-canvas.addEventListener("touchend", calculateLauchingVelocity)
+canvas.addEventListener("touchend", (e)=>{
+    e.preventDefault();
+    calculateLauchingVelocity()
+});
 
 
