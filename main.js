@@ -41,6 +41,8 @@ class Balls {
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
+
+
     }
 
     move() {
@@ -78,11 +80,27 @@ class Balls {
 
 }
 
+const drawLine = () => {
+    if (launchingPos) {
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(posXStart, posYStart);
+        ctx.lineTo(posX, posY);
+        ctx.stroke();
+    }
+}
+
 
 const animate = () => {
+
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
+
     requestAnimationFrame(animate);
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    drawLine();
 
     for (i = 0; i < arrayOfBalls.length; i++) {
 
@@ -94,9 +112,6 @@ const animate = () => {
             }
         }
     }
-
-
-
 }
 
 animate();
@@ -182,6 +197,8 @@ const calculateLauchingVelocity = () => {
     }
 }
 
+
+
 const createBall = () => {
 
     const h = Math.floor(Math.random() * 358);
@@ -193,7 +210,7 @@ const createBall = () => {
     const radius = parseInt(radiusMenu.value);
     const boucing = parseFloat(boucingMenu.value);
 
-    arrayOfBalls.push(new Balls(posXStart, posYStart, vx, vy, radius, boucing, color));
+    arrayOfBalls.push(new Balls(posX, posY, vx, vy, radius, boucing, color));
 }
 
 const initPosLaunching = (eventPosX, eventPosY) => {
@@ -211,6 +228,10 @@ btnMenu.addEventListener("click", () => {
 })
 
 canvas.addEventListener("mousedown", (e) => {
+
+    posX = e.clientX;
+    posY = e.clientY;
+
     eventPosX = e.clientX;
     eventPosY = e.clientY;
 
@@ -218,6 +239,9 @@ canvas.addEventListener("mousedown", (e) => {
 });
 
 canvas.addEventListener("touchstart", (e) => {
+
+    posX = e.touches[0].clientX;
+    posY = e.touches[0].clientY;
 
     eventPosX = e.touches[0].clientX;
     eventPosY = e.touches[0].clientY;
@@ -247,11 +271,11 @@ canvas.addEventListener("touchmove", (e) => {
 });
 
 
-canvas.addEventListener("mouseup", ()=>{ 
+canvas.addEventListener("mouseup", () => {
     calculateLauchingVelocity()
 });
 
-canvas.addEventListener("touchend", (e)=>{
+canvas.addEventListener("touchend", (e) => {
     e.preventDefault();
     calculateLauchingVelocity()
 });
