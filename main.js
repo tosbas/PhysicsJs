@@ -4,9 +4,15 @@ const btnMenu = document.getElementById("btn-menu");
 const menu = document.getElementById("menu");
 const radiusMenu = document.getElementById("radius");
 const boucingMenu = document.getElementById("bouncing");
+const btnClear = document.getElementById("btn-clear");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+})
 
 let launchingPos = false;
 let posXStart = 0;
@@ -18,7 +24,7 @@ let dirY = 0;
 let vx = 0;
 let vy = 0;
 
-const arrayOfBalls = [];
+let arrayOfBalls = [];
 
 
 class Balls {
@@ -35,14 +41,11 @@ class Balls {
 
     draw() {
         ctx.beginPath();
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#000";
         ctx.fillStyle = this.color;
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
-
-
     }
 
     move() {
@@ -94,7 +97,7 @@ const drawLine = () => {
 
 const animate = () => {
 
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.fillStyle = "rgba(0,0,0,0.3)";
 
     requestAnimationFrame(animate);
 
@@ -207,6 +210,14 @@ const createBall = () => {
 
     const color = `hsl(${h},${s}%, ${l}%)`;
 
+    if (parseInt(radiusMenu.value) > 100) {
+        radiusMenu.value = 100;
+    }
+
+    if (parseFloat(boucingMenu.value) > 1) {
+        boucingMenu.value = 1;
+    }
+
     const radius = parseInt(radiusMenu.value);
     const boucing = parseFloat(boucingMenu.value);
 
@@ -229,13 +240,16 @@ btnMenu.addEventListener("click", () => {
 
 canvas.addEventListener("mousedown", (e) => {
 
-    posX = e.clientX;
-    posY = e.clientY;
+    if (e.button == 0) {
+        posX = e.clientX;
+        posY = e.clientY;
 
-    eventPosX = e.clientX;
-    eventPosY = e.clientY;
+        eventPosX = e.clientX;
+        eventPosY = e.clientY;
 
-    initPosLaunching(eventPosX, eventPosY)
+        initPosLaunching(eventPosX, eventPosY)
+    }
+
 });
 
 canvas.addEventListener("touchstart", (e) => {
@@ -279,5 +293,10 @@ canvas.addEventListener("touchend", (e) => {
     e.preventDefault();
     calculateLauchingVelocity()
 });
+
+
+btnClear.addEventListener("click", () => {
+    arrayOfBalls = [];
+})
 
 
