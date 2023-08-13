@@ -14,6 +14,12 @@ window.addEventListener("resize", () => {
     canvas.height = window.innerHeight;
 })
 
+const FullScreenMode = () => {
+    const win = window.open("", "full", "dependent=yes, fullscreen=yes");
+    win.location = window.location.href;
+    window.opener = null;
+}
+
 let launchingPos = false;
 let posXStart = 0;
 let posYStart = 0;
@@ -214,8 +220,16 @@ const createBall = () => {
         radiusMenu.value = 100;
     }
 
+    if (parseInt(radiusMenu.value) === 0 || radiusMenu.value.length === 0) {
+        radiusMenu.value = 2;
+    }
+
     if (parseFloat(boucingMenu.value) > 1) {
         boucingMenu.value = 1;
+    }
+
+    if (boucingMenu.value.length === 0) {
+       boucingMenu.value = 0;
     }
 
     const radius = parseInt(radiusMenu.value);
