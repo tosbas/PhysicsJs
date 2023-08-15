@@ -15,6 +15,7 @@ window.addEventListener("resize", () => {
 })
 
 const FullScreenMode = () => {
+
     const win = window.open("", "full", "dependent=yes, fullscreen=yes");
     win.location = window.location.href;
     window.opener = null;
@@ -92,7 +93,6 @@ class Balls {
 const drawLine = () => {
     if (launchingPos) {
         ctx.strokeStyle = "white";
-        ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(posXStart, posYStart);
         ctx.lineTo(posX, posY);
@@ -103,7 +103,7 @@ const drawLine = () => {
 
 const animate = () => {
 
-    ctx.fillStyle = "rgba(0,0,0,0.3)";
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
 
     requestAnimationFrame(animate);
 
@@ -206,8 +206,6 @@ const calculateLauchingVelocity = () => {
     }
 }
 
-
-
 const createBall = () => {
 
     const h = Math.floor(Math.random() * 358);
@@ -220,7 +218,7 @@ const createBall = () => {
         radiusMenu.value = 100;
     }
 
-    if (parseInt(radiusMenu.value) === 0 || radiusMenu.value.length === 0) {
+    if (parseInt(radiusMenu.value) === 0 || parseInt(radiusMenu.value) === 1 || radiusMenu.value.length === 0) {
         radiusMenu.value = 2;
     }
 
@@ -229,13 +227,25 @@ const createBall = () => {
     }
 
     if (boucingMenu.value.length === 0) {
-       boucingMenu.value = 0;
+        boucingMenu.value = 0;
     }
 
     const radius = parseInt(radiusMenu.value);
     const boucing = parseFloat(boucingMenu.value);
 
-    arrayOfBalls.push(new Balls(posX, posY, vx, vy, radius, boucing, color));
+    const maxCirclesWidth = Math.floor(window.innerWidth / (2 * radius));
+    const maxCirclesHeight = Math.floor(window.innerHeight / (2 * radius));
+    const maxCircles = maxCirclesWidth * maxCirclesHeight;
+
+    const existingCircles = arrayOfBalls.filter(ball => ball.radius === radius).length;
+
+    const remainingSpace = maxCircles - existingCircles;
+
+    if (remainingSpace > 0) {
+        arrayOfBalls.push(new Balls(posX, posY, vx, vy, radius, boucing, color));
+    }
+
+
 }
 
 const initPosLaunching = (eventPosX, eventPosY) => {
